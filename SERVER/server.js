@@ -2,15 +2,20 @@ const mongoclient = require('mongodb').MongoClient;
 const ObjId = require('mongodb').ObjectId;
 const url = 'mongodb+srv://xxoyya:1234@cluster0.7clwbsq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
+const express = require('express');
+const app = express();
 let mydb;
 
 mongoclient.connect(url)
     .then(client => {
         console.log('몽고DB 접속 성공');
         mydb = client.db('myboard');
+        mydb.collection('post').find().toArray().then(result =>{
+            console.log(result);
+        })
     })
 
-    //MYSQL + Node.js 접속 코드드
+    //MYSQL + Node.js 접속 코드
     var mysql = require('mysql');
     var conn = mysql.createConnection({
         host: 'localhost',
@@ -20,9 +25,6 @@ mongoclient.connect(url)
     });
 
     conn.connect();
-
-    const express = require('express');
-    const app = express();
 
     app.set('view engine', 'ejs');
 
@@ -70,10 +72,10 @@ mongoclient.connect(url)
     app.post('/save', function(req, res){
         console.log(req.body.title);
         console.log(req.body.content);
-        console.log(req.body.someData);
+        console.log(req.body.someDate);
         // 몽고 DB에 데이터 저장하기
         mydb.collection('post').insertOne(
-            {title: req.body.title, content: req.body.content, date: req.body.someData},
+            {title: req.body.title, content: req.body.content, date: req.body.someDate},
             ).then(result => {
                 console.log(result);
                 console.log('데이터 추가 성공');
