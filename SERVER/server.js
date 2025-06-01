@@ -10,12 +10,15 @@ const url = 'mongodb+srv://xxoyya:1234@cluster0.7clwbsq.mongodb.net/?retryWrites
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
+// 정적 파일 라이브러리 추가
+app.use(express.static('public'));
+
 // MySQL 연결
 const conn = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '1234',
-  database: 'myboard',
+    host: 'localhost',
+    user: 'root',
+    password: '1234',
+    database: 'myboard',
 });
 conn.connect();
 
@@ -40,16 +43,16 @@ MongoClient.connect(url)
     });
 
     app.get('/enter', (req, res) => {
-      res.render('enter.ejs');
+        res.render('enter.ejs');
     });
 
     app.post('/save', async (req, res) => {
       try {
         console.log(req.body.title, req.body.content, req.body.someDate);
         await mydb.collection('post').insertOne({
-          title: req.body.title,
-          content: req.body.content,
-          date: req.body.someDate,
+            title: req.body.title,
+            content: req.body.content,
+            date: req.body.someDate,
         });
         console.log('데이터 추가 성공');
         res.redirect('/list');
@@ -57,6 +60,7 @@ MongoClient.connect(url)
         console.error('❌ /save 에러:', err);
         res.status(500).send('저장 중 오류 발생');
       }
+      res.redirect('/list');
     });
 
     app.post('/delete', async (req, res) => {
@@ -71,8 +75,51 @@ MongoClient.connect(url)
       }
     });
 
+    app.get('/content/:id', function(req, res){
+        console.log(req.params.id);
+        req.params.id = new ObjectId(req.params.id);
+        mydb
+            .collection('post')
+            .findOne({_id: req.params.id})
+            .then(result => {
+                console.log(result);
+                res.render('content.ejs', {data: result});
+            });
+    });
+
+    app.get('/edit/:id', function(req, res){
+        req.params.id = new ObjectId(req.params.id);
+        mydb
+            .collection('post')
+            .findOne({_id: req.params.id})
+            .then(result => {
+                console.log(result);
+                res.render('edit.ejs', {data: result});
+            });
+    });
+
+    app.post('/edit', async (req, res) => {
+        try {
+            const id = new ObjectId(req.body.id);
+            await mydb.collection('post').updateOne({_id: id}, {$set: {
+                title: req.body.title,
+                content: req.body.content,
+                date: req.body.someDate,
+            }});
+            console.log('수정 완료');
+            res.redirect('/list');
+        } catch (err) {
+            console.error('❌ /edit 에러:', err);
+            res.status(500).send('수정 중 오류 발생');
+        }
+    });
+
+    app.get("/", function(req, res){
+        res.render('index.ejs');
+    });
+
     app.listen(8080, () => {
-      console.log("포트 8080으로 서버 대기중 ...");
+        console.log("포트 8080으로 서버 대기중 ...");
     });
   })
   .catch(err => {
