@@ -11,9 +11,11 @@
   "dependencies": {
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "mongodb": "^6.16.0",
+    "multer": "^2.0.0",
     "mysql": "^2.18.1",
     "node-mysql": "^0.4.2",
     "sha256": "^0.2.0"
